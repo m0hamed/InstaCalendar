@@ -3,6 +3,8 @@ package fi.aalto.moble.instacalendar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -19,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,9 +32,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit.Call;
+import retrofit.GsonConverterFactory;
+import retrofit.Response;
+import retrofit.Retrofit;
+
+import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
@@ -74,6 +84,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                Log.i("Login activity", id + ", " + R.id.login);
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
                     attemptLogin();
                     return true;
@@ -191,13 +202,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isEmailValid(String email) {
+        return true;
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        //return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        //return password.length() > 4;
+        return true;
     }
 
     /**
@@ -290,6 +303,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView.setAdapter(adapter);
     }
 
+    private void setLoginToken(String token) {
+        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
+                getString(R.string.preferences_file_name), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("login_token", token);
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -307,24 +327,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("http://192.168.1.117:3001/api/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
 
+            InstaCalAPI api = retrofit.create(InstaCalAPI.class);
+            Log.w("Login Backgroud Task", "test");
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                Response<LoginToken> login = api.login(new User(mEmail, mPassword)).execute();
+                if(login.isSuccess()) {
+                    String s = login.body().token;
+                    Log.w("Login Backgroud Task", "token: " + s);
+                    setLoginToken(login.body().token);
+                    Response<List<Calendar>> calendars = api.calendars(s).execute();
+                    if(calendars.isSuccess()) {
+                        Log.w("Login Backgroud Task", "Calendar List Success");
+                        //Log.w("Login Backgroud Task", "First Calendar is:" + calendars.body().get(0).toString());
+                    } else {
+                        Log.w("Login Backgroud Task", calendars.errorBody().toString());
+                    }
+                    return true;
+                } else {
+                    Log.w("Login Backgroud Task",login.raw().toString());
+                    return false;
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-            // TODO: register the new account here.
-            return true;
+            return false;
         }
 
         @Override
@@ -333,7 +365,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                finish();
+                //finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
