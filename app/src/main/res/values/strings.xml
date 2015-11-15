@@ -15,4 +15,5 @@
         completions."
     </string>
     <string name="title_activity_list_calendars">ListCalendarsActivity</string>
+    <string name="title_activity_event_list">Events</string>
 </resources>
