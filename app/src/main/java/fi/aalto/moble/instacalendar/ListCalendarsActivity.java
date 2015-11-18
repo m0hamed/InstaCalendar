@@ -1,6 +1,7 @@
 package fi.aalto.moble.instacalendar;
 
 import android.content.ClipData;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -53,6 +54,9 @@ public class ListCalendarsActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Calendar c = (Calendar)parent.getItemAtPosition(position);
+                Intent intent = new Intent(getBaseContext(), EventList.class);
+                intent.putExtra("CALENDAR_ID", c._id);
+                startActivity(intent);
                 Log.w("Click Listner", c._id);
             }
         });

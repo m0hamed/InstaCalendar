@@ -6,6 +6,7 @@ import retrofit.Call;
 import retrofit.http.Body;
 import retrofit.http.GET;
 import retrofit.http.POST;
+import retrofit.http.Path;
 import retrofit.http.Query;
 
 
@@ -21,4 +22,7 @@ public interface InstaCalAPI {
 
     @GET("calendars")
     Call<List<Calendar>> calendars(@Query("auth_token") String token);
+
+    @GET("calendars/{id}/events")
+    Call<List<Event>> events(@Path("id") String calendar_id, @Query("auth_token") String token);
 }
