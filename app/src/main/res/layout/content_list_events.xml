@@ -7,10 +7,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/activity_list_calendars"
-    tools:context="fi.aalto.moble.instacalendar.ListCalendarsActivity">
+    tools:showIn="@layout/activity_list_events"
+    tools:context="fi.aalto.moble.instacalendar.ListEventsActivity">
 
-    <ListView android:id="@+id/calendars_list"
+    <ListView android:id="@+id/events_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#ffffff"

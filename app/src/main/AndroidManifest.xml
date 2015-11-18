@@ -28,6 +28,13 @@
             android:label="@string/title_activity_list_calendars"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+        <activity
+            android:name=".ListEventsActivity"
+            android:label="@string/title_activity_list_events"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity android:name=".CreateEvent" >
+        </activity>
     </application>
 
 </manifest>

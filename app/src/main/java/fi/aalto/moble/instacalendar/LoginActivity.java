@@ -3,9 +3,13 @@ package fi.aalto.moble.instacalendar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -53,6 +57,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
+    public static final String EXTRA_CALENDARS_LIST = "instacalendar.CALENDARS_LIST";
+    public static final String EXTRA_MESSAGE = "instacalendar.MESSAGE";
+    public static String token = "";
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -203,7 +210,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isEmailValid(String email) {
         return true;
-        //TODO: Replace this with your own logic
+        //TODO:Calendar Replace this with your own logic
         //return email.contains("@");
     }
 
@@ -310,6 +317,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         editor.putString("login_token", token);
     }
 
+    public static String getLoginToken() {
+       return token;
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -328,7 +339,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://192.168.1.117:3001/api/")
+                    .baseUrl("http://192.168.1.135:3001/api/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
@@ -338,12 +349,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Response<LoginToken> login = api.login(new User(mEmail, mPassword)).execute();
                 if(login.isSuccess()) {
                     String s = login.body().token;
+                    token = s;
                     Log.w("Login Backgroud Task", "token: " + s);
                     setLoginToken(login.body().token);
                     Response<List<Calendar>> calendars = api.calendars(s).execute();
                     if(calendars.isSuccess()) {
                         Log.w("Login Backgroud Task", "Calendar List Success");
-                        //Log.w("Login Backgroud Task", "First Calendar is:" + calendars.body().get(0).toString());
+                        Intent intent = new Intent(LoginActivity.this, ListCalendarsActivity.class);
+                        ArrayList<Parcelable> calendarsList = new ArrayList<>();
+                        calendarsList.addAll(calendars.body());
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelableArray(EXTRA_CALENDARS_LIST, calendarsList.toArray(new Parcelable[0]));
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                        Log.w("Login Backgroud Task", "First Calendar is:" + calendars.body().get(0).toString());
                     } else {
                         Log.w("Login Backgroud Task", calendars.errorBody().toString());
                     }

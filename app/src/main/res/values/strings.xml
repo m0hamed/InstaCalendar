@@ -14,5 +14,9 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="calendars_list">calendars_list</string>
     <string name="title_activity_list_calendars">ListCalendarsActivity</string>
+    <string name="title_activity_list_events">ListEventsActivity</string>
+    <string name="event_title">Title</string>
+    <string name="event_location">location</string>
 </resources>
