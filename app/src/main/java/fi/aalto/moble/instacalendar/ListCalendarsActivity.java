@@ -1,11 +1,8 @@
 package fi.aalto.moble.instacalendar;
 
-
-import android.content.ClipData;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -21,24 +18,17 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
 import retrofit.Response;
 
 public class ListCalendarsActivity extends AppCompatActivity {
 
     public static String EXTRA_CAL_ID = "instacalendar.CAL_ID";
 
-
-    public ListAdapter mAdapter;
     public ListView listView;
 
     @Override
@@ -124,7 +114,6 @@ public class ListCalendarsActivity extends AppCompatActivity {
                         return v;
                     }
                 });
-            } else {
             }
         }
 
