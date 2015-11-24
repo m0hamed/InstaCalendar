@@ -59,7 +59,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_READ_CONTACTS = 0;
     public static final String EXTRA_CALENDARS_LIST = "instacalendar.CALENDARS_LIST";
     public static final String EXTRA_MESSAGE = "instacalendar.MESSAGE";
-    public static String token = "";
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -310,15 +309,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView.setAdapter(adapter);
     }
 
-    private void setLoginToken(String token) {
-        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
-                getString(R.string.preferences_file_name), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("login_token", token);
-    }
-
-    public static String getLoginToken() {
-       return token;
+    private void listCalendars() {
+        Intent intent = new Intent(this, ListCalendarsActivity.class);
+        startActivity(intent);
     }
 
     /**
@@ -337,21 +330,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://192.168.1.135:3001/api/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            InstaCalAPI api = retrofit.create(InstaCalAPI.class);
-            Log.w("Login Backgroud Task", "test");
+            InstaCalAPI api = ApiWrapper.getApi();
             try {
                 Response<LoginToken> login = api.login(new User(mEmail, mPassword)).execute();
                 if(login.isSuccess()) {
                     String s = login.body().token;
-                    token = s;
                     Log.w("Login Backgroud Task", "token: " + s);
-                    setLoginToken(login.body().token);
                     Response<List<Calendar>> calendars = api.calendars(s).execute();
                     if(calendars.isSuccess()) {
                         Log.w("Login Backgroud Task", "Calendar List Success");
@@ -366,6 +350,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     } else {
                         Log.w("Login Backgroud Task", calendars.errorBody().toString());
                     }
+                    ApiWrapper.setToken(getApplicationContext(), login.body().token);
                     return true;
                 } else {
                     Log.w("Login Backgroud Task",login.raw().toString());
@@ -384,7 +369,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                //finish();
+                listCalendars();
+
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

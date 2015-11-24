@@ -55,6 +55,4 @@ public class Event implements Parcelable {
         return name + " - " + (place == null? "-" : place);
     }
 
-
-
 }

@@ -1,5 +1,7 @@
 package fi.aalto.moble.instacalendar;
 
+
+import android.content.ClipData;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -9,12 +11,18 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -27,9 +35,11 @@ import retrofit.Response;
 
 public class ListCalendarsActivity extends AppCompatActivity {
 
-    public static String EXTRA_EVENTS_LIST = "instacalendar.EVENTS";
     public static String EXTRA_CAL_ID = "instacalendar.CAL_ID";
 
+
+    public ListAdapter mAdapter;
+    public ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,21 +47,25 @@ public class ListCalendarsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list_calendars);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle("Calendars");
 
-        final Parcelable[] calendars = getIntent().getParcelableArrayExtra(LoginActivity.EXTRA_CALENDARS_LIST);
-        ArrayList<String> calendarNames = new ArrayList<>();
-        for (Parcelable calendar : calendars) {
-            calendarNames.add(((Calendar)calendar).name);
-        }
+        ProgressBar progressBar = new ProgressBar(this);
+        progressBar.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        progressBar.setIndeterminate(true);
+        listView = (ListView)findViewById(R.id.calendars_list);
+        listView.setEmptyView(progressBar);
 
-        ListAdapter calendarsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, calendarNames.toArray(new String[0]));
-        ListView calendarsView = (ListView) findViewById(R.id.calendars_list);
-        calendarsView.setAdapter(calendarsAdapter);
-        calendarsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        new CalendarListTask().execute();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Calendar c = (Calendar) calendars[position];
-                new GetEventsTask(c).execute((Void)null);
+                Calendar c = (Calendar)parent.getItemAtPosition(position);
+                Intent intent = new Intent(getBaseContext(), ListEventsActivity.class);
+                intent.putExtra(EXTRA_CAL_ID, c._id);
+                startActivity(intent);
+                Log.w("Click Listner", c._id);
             }
         });
 
@@ -65,44 +79,58 @@ public class ListCalendarsActivity extends AppCompatActivity {
         });
     }
 
-    public class GetEventsTask extends AsyncTask<Void, Void, Boolean> {
-        private final Calendar calendar;
+    public class CalendarListTask extends AsyncTask<Void, Void, List<Calendar>> {
 
 
-        GetEventsTask(Calendar calendar) {
-            this.calendar = calendar;
-        }
+        @Override
+        protected List<Calendar> doInBackground(Void... params) {
 
-        public Boolean doInBackground(Void...params) {
-            // should be moved to wrapper class
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://192.168.1.135:3001/api/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            InstaCalAPI api = retrofit.create(InstaCalAPI.class);
+            InstaCalAPI api = ApiWrapper.getApi();
+            Log.w("CalendarListTask", "test");
             try {
-                Response<List<Event>> events =
-                        api.events(calendar._id, LoginActivity.getLoginToken()
-                                ).execute();
-                if (events.isSuccess()) {
-                    Intent intent = new Intent(ListCalendarsActivity.this, ListEventsActivity.class);
-                    ArrayList<Parcelable> eventsList = new ArrayList<>();
-                    eventsList.addAll(events.body());
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArray(EXTRA_EVENTS_LIST, eventsList.toArray(new Parcelable[0]));
-                    intent.putExtra(EXTRA_CAL_ID, calendar._id);
-                    intent.putExtras(bundle);
-                    startActivity(intent);
-
-                    Log.w("Events Task: " + events.body().get(0).toString(), "Info");
+                Response<List<Calendar>> calendars = api.calendars(ApiWrapper.getToken(getApplicationContext())).execute();
+                if(calendars.isSuccess()) {
+                    return calendars.body();
+                } else {
+                    Log.w("CalendarListTask",calendars.raw().toString());
+                    return null;
                 }
             } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "Network Error, please try again!", Toast.LENGTH_LONG).show();
-                return false;
+                e.printStackTrace();
             }
-            return true;
+
+            return null;
         }
 
+        @Override
+        protected void onPostExecute(final List<Calendar> calendars) {
+
+            if (calendars != null) {
+                Log.w("CalenderListTask", calendars.toString());
+                listView.setAdapter(new ArrayAdapter<Calendar>(getApplicationContext(), R.layout.list_view, calendars) {
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        View v = convertView;
+
+                        if (v == null) {
+                            LayoutInflater vi;
+                            vi = LayoutInflater.from(getContext());
+                            v = vi.inflate(R.layout.list_view, null);
+                        }
+                        Calendar p = getItem(position);
+                        if(p != null) {
+                            TextView tt1 = (TextView) v.findViewById(R.id.calendar_name);
+                            tt1.setText(p.name);
+                        }
+                        return v;
+                    }
+                });
+            } else {
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
     }
 
 }

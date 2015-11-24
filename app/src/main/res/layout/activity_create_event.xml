@@ -59,7 +59,7 @@
         android:layout_height="wrap_content"
         android:text="Done"
         android:id="@+id/submit"
-        android:layout_below="@+id/To"
-        android:layout_alignRight="@+id/To"
-        android:layout_alignEnd="@+id/To" />
+        android:layout_below="@+id/to"
+        android:layout_alignRight="@+id/to"
+        android:layout_alignEnd="@+id/to" />
 </RelativeLayout>

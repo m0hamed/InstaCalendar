@@ -27,5 +27,9 @@ public interface InstaCalAPI {
     Call<List<Event>> events(@Path("cal_id") String userId, @Query("auth_token") String token);
 
     @POST("calendars/{cal_id}/events")
-    Call<Void> createEvent(@Path("cal_id") String userId, @Query("auth_token") String token, @Body Event event);
+    Call<Void> createEvent(@Path("cal_id") String userId, @Query("auth_token") String token, @Body CreateEvent.AppEvent event);
+
+    @POST("calendars/{cal_id}/events/{id}")
+    Call<Void> updateEvent(@Path("cal_id") String calId, @Path("id") String id, @Query("auth_token") String token, @Body CreateEvent.AppEvent event);
+
 }
