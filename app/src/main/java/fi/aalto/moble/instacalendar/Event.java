@@ -22,7 +22,7 @@ public class Event implements Parcelable {
     public final String starts_at;
     public final String ends_at;
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("EE MMM dd yyyy hh:mm:ss z");
 
 
     public Event(String name, String place, String google_id, String id, String starts_at, String ends_at) {
@@ -73,20 +73,19 @@ public class Event implements Parcelable {
 
     public static Date ISOToDate(String iso) {
         try {
-            String s = iso.replaceFirst("T", " ");
-            return dateFormat.parse(s);
-        }catch(Exception e) {
+            return dateFormat.parse(iso);
+        } catch(Exception e) {
             return null;
         }
     }
 
     public static String dateToISO(Date date) {
-         return dateFormat.format(date).replaceFirst(" ", "T");
+         return dateFormat.format(date);
     }
 
     public static String stringToISO(String date) {
         try {
-            Date d = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").parse(date);
+            Date d = new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(date);
             return dateToISO(d);
         } catch(Exception e) {
             Log.w("ERROR", e);
@@ -97,7 +96,7 @@ public class Event implements Parcelable {
     public static String ISOToString(String date) {
         try {
             Date d = ISOToDate(date);
-            return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(d);
+            return new SimpleDateFormat("dd-MM-yyyy HH:mm").format(d);
         } catch(Exception e) {
             Log.w("ERROR", e);
             return null;
