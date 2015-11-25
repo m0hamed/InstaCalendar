@@ -126,6 +126,7 @@ public class ListEventsActivity extends AppCompatActivity {
                         }
                         Event p = getItem(position);
                         if(p != null) {
+
                             TextView tt1 = (TextView) v.findViewById(R.id.event_name);
                             tt1.setText(p.name);
                         }

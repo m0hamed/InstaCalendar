@@ -8,6 +8,7 @@ import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.Path;
 import retrofit.http.Query;
+import retrofit.http.DELETE;
 
 
 /**
@@ -32,4 +33,6 @@ public interface InstaCalAPI {
     @POST("calendars/{cal_id}/events/{id}")
     Call<Void> updateEvent(@Path("cal_id") String calId, @Path("id") String id, @Query("auth_token") String token, @Body CreateEvent.AppEvent event);
 
+    @DELETE("calendars/{cal_id}/events/{id}")
+    Call<Void> deleteEvent(@Path("cal_id") String calID, @Path("id") String id, @Query("auth_token") String token);
 }

@@ -31,7 +31,6 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="date"
         android:ems="10"
         android:id="@+id/from"
         android:layout_alignRight="@+id/place"
@@ -44,7 +43,6 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="date"
         android:ems="10"
         android:id="@+id/to"
         android:hint="To"
@@ -62,4 +60,12 @@
         android:layout_below="@+id/to"
         android:layout_alignRight="@+id/to"
         android:layout_alignEnd="@+id/to" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:id="@+id/delete"
+        android:layout_alignTop="@+id/submit"
+        android:layout_toLeftOf="@+id/submit"
+        android:layout_toStartOf="@+id/submit" />
 </RelativeLayout>
