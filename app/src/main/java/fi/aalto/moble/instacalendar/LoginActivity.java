@@ -86,6 +86,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
+
+
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -330,6 +332,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
+
             InstaCalAPI api = ApiWrapper.getApi();
             try {
                 Response<LoginToken> login = api.login(new User(mEmail, mPassword)).execute();
@@ -339,6 +342,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Response<List<Calendar>> calendars = api.calendars(s).execute();
                     if(calendars.isSuccess()) {
                         Log.w("Login Backgroud Task", "Calendar List Success");
+
                         Intent intent = new Intent(LoginActivity.this, ListCalendarsActivity.class);
                         ArrayList<Parcelable> calendarsList = new ArrayList<>();
                         calendarsList.addAll(calendars.body());
@@ -369,7 +373,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                listCalendars();
+                //listCalendars();
 
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

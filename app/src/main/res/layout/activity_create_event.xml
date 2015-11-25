@@ -57,9 +57,9 @@
         android:layout_height="wrap_content"
         android:text="Done"
         android:id="@+id/submit"
-        android:layout_below="@+id/to"
-        android:layout_alignRight="@+id/to"
-        android:layout_alignEnd="@+id/to" />
+        android:layout_below="@id/to"
+        android:layout_alignRight="@id/to"
+        android:layout_alignEnd="@id/to" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,4 +68,22 @@
         android:layout_alignTop="@+id/submit"
         android:layout_toLeftOf="@+id/submit"
         android:layout_toStartOf="@+id/submit" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sync"
+        android:id="@+id/sync"
+        android:layout_alignTop="@id/delete"
+        android:layout_toLeftOf="@id/delete"
+        android:layout_toStartOf="@id/delete" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get From Phone"
+        android:id="@+id/get_from_phone"
+        android:layout_below="@id/submit"
+        android:layout_alignRight="@id/submit"
+        android:layout_alignEnd="@id/submit" />
 </RelativeLayout>
