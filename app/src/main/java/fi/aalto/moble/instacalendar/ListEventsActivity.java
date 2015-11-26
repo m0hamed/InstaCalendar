@@ -3,9 +3,7 @@ package fi.aalto.moble.instacalendar;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -15,14 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit.Response;
@@ -35,6 +32,13 @@ public class ListEventsActivity extends AppCompatActivity {
     private String calId;
     public ListView listView;
     public List<Event> events;
+
+    private String d;
+    private String m;
+    private String y;
+
+    private retrofit.Call<List<Event>> call;
+    private boolean isFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,16 +82,46 @@ public class ListEventsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        Button filter = (Button) findViewById(R.id.filter);
+        filter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ListEventsActivity.this, FilterActivity.class);
+                intent.putExtra(ListCalendarsActivity.EXTRA_CAL_ID, calId);
+                startActivityForResult(intent, 1);
+            }
+        });
+
+        isFilter = false;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (!isFilter) {
+            InstaCalAPI api = ApiWrapper.getApi();
+            call = api.events(calId, ApiWrapper.getToken(getApplicationContext()));
+        }
+        isFilter = false;
         new ListEventsTask().execute((Void) null);
     }
 
-    public class ListEventsTask extends AsyncTask<Void, Void, List<Event>> {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        d = data.getStringExtra("DAY");
+        m = data.getStringExtra("MONTH");
+        y = data.getStringExtra("YEAR");
+        isFilter = true;
 
+        Query q = getQuery(data.getBooleanExtra("GETDAY", false));
+        InstaCalAPI api = ApiWrapper.getApi();
+        call = api.search(calId, ApiWrapper.getToken(getApplicationContext()), q);
+
+
+    }
+
+    public class ListEventsTask extends AsyncTask<Void, Void, List<Event>> {
 
         @Override
         protected List<Event> doInBackground(Void... params) {
@@ -95,7 +129,7 @@ public class ListEventsActivity extends AppCompatActivity {
             InstaCalAPI api = ApiWrapper.getApi();
             Log.w("EventListTask", "test");
             try {
-                Response<List<Event>> events = api.events(calId, ApiWrapper.getToken(getApplicationContext())).execute();
+                Response<List<Event>> events = call.execute();
                 if(events.isSuccess()) {
                     return events.body();
                 } else {
@@ -139,6 +173,41 @@ public class ListEventsActivity extends AppCompatActivity {
 
         @Override
         protected void onCancelled() {
+        }
+    }
+
+    private Query getQuery(boolean getDay) {
+        if (getDay) {
+            return new Query(Event.stringToISO(d + "-" + m + "-" + y + " 00:00:00"),
+                    Event.stringToISO(d + "-" + m + "-" + y + " 23:59:59"));
+        }
+        else
+        {
+            int mInt = Integer.parseInt(m);
+            String maxDay = "30";
+            if (mInt==4||mInt==6||mInt==9||mInt==11)
+                maxDay = "31";
+            else if (mInt==2)
+                maxDay = "28";
+            return new Query(Event.stringToISO("01" + "-" + m + "-" + y + " 00:00:00"),
+                    Event.stringToISO(maxDay + "-" + m + "-" + y + " 23:59:59"));
+        }
+    }
+
+    public class Query {
+        public class Time {
+            public final String from;
+            public final String to;
+
+            public Time(String f, String t) {
+                from = f;
+                to = t;
+            }
+        }
+
+        public final Time starts_at;
+        public Query(String before, String after) {
+            starts_at = new Time(before, after);
         }
     }
 

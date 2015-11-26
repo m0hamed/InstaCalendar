@@ -19,5 +19,6 @@
     <string name="title_activity_list_events">Events</string>
     <string name="event_title">Title</string>
     <string name="event_location">location</string>
+    <string name="title_activity_filter">FilterActivity</string>
 
 </resources>

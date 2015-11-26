@@ -35,4 +35,8 @@ public interface InstaCalAPI {
 
     @DELETE("calendars/{cal_id}/events/{id}")
     Call<Void> deleteEvent(@Path("cal_id") String calID, @Path("id") String id, @Query("auth_token") String token);
+
+    @POST("calendars/{cal_id}/events/search")
+    Call<List<Event>> search(@Path("cal_id") String calId, @Query("auth_token") String token, @Body ListEventsActivity.Query query);
+
 }
