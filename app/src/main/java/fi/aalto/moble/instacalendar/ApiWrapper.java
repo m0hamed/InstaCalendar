@@ -18,7 +18,7 @@ public class ApiWrapper {
             return api;
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://130.23.42.176:8080/api/")
+                .baseUrl("http://130.233.42.176:8080/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 

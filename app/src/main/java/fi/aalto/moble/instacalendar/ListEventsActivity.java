@@ -109,6 +109,8 @@ public class ListEventsActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data == null)
+            return;
         d = data.getStringExtra("DAY");
         m = data.getStringExtra("MONTH");
         y = data.getStringExtra("YEAR");
