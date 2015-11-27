@@ -93,6 +93,15 @@ public class Event implements Parcelable {
         }
     }
 
+    public static long stringToMilliseconds(String date) {
+        try {
+            return new SimpleDateFormat("dd-MM-yyyy HH:mm").parse(date).getTime();
+        } catch(Exception e) {
+            Log.w("ERROR", e);
+            return 0;
+        }
+    }
+
     public static String ISOToString(String date) {
         try {
             Date d = ISOToDate(date);

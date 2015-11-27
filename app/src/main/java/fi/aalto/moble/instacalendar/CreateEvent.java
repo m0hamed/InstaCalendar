@@ -1,6 +1,8 @@
 package fi.aalto.moble.instacalendar;
 
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -55,6 +57,38 @@ public class CreateEvent extends AppCompatActivity {
                 new DeleteEventAsync().execute((Void)null);
             }
         });
+        Button sync = (Button) findViewById(R.id.sync);
+        sync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                try {
+                    Intent intent = new Intent(Intent.ACTION_INSERT)
+                            .setData(CalendarContract.Events.CONTENT_URI)
+                            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, Event.stringToMilliseconds(from.getText().toString()))
+                            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, Event.stringToMilliseconds(to.getText().toString()))
+                            .putExtra(CalendarContract.Events.TITLE, name.getText().toString())
+                                    //.putExtra(CalendarContract.Events.DESCRIPTION, "Group class")
+                            .putExtra(CalendarContract.Events.EVENT_LOCATION, place.getText().toString());
+                    //.putExtra(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_BUSY)
+                    //.putExtra(Intent.EXTRA_EMAIL, "rowan@example.com,trevor@example.com");
+                    startActivity(intent);
+                } catch(Exception e) {
+                    Log.w("ERROR", e);
+                }
+
+            }
+        });
+
+        Button extract = (Button) findViewById(R.id.get_from_phone);
+        extract.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CreateEvent.this, ListPhoneEventsActivity.class);
+                intent.putExtra(ListCalendarsActivity.EXTRA_CAL_ID, calId);
+                startActivity(intent);
+            }
+        });
 
         if (isUpdate) {
             Event e = getIntent().getParcelableExtra(ListEventsActivity.EVENT_EXTRA);
@@ -64,6 +98,8 @@ public class CreateEvent extends AppCompatActivity {
             from.setText(Event.ISOToString(e.starts_at));
             to.setText(Event.ISOToString(e.ends_at));
             delete.setVisibility(Button.VISIBLE);
+            sync.setVisibility(Button.VISIBLE);
+            extract.setVisibility(Button.INVISIBLE);
             done.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -75,6 +111,8 @@ public class CreateEvent extends AppCompatActivity {
             });
         } else {
             delete.setVisibility(Button.INVISIBLE);
+            sync.setVisibility(Button.INVISIBLE);
+            extract.setVisibility(Button.VISIBLE);
             done.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -173,6 +211,13 @@ public class CreateEvent extends AppCompatActivity {
             this.ends_at = ends_at;
             this.starts_at = starts_at;
 
+        }
+
+        public AppEvent(String name, String place, Long starts_at, Long ends_at) {
+            this.name = name;
+            this.place = place;
+            this.ends_at = Event.dateToISO(new Date(ends_at));
+            this.starts_at = Event.dateToISO(new Date(starts_at));
         }
     }
 }
